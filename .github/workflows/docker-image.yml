@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: eShop Build and Test
 
 on:
   push:
@@ -7,12 +7,29 @@ on:
     branches: [ main ]
 
 jobs:
-
   build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore ./eShopOnWeb.sln
+    - name: Build
+      run: dotnet build ./eShopOnWeb.sln --configuration Release
+    - name: Test
+      run: dotnet test ./eShopOnWeb.sln --configuration Release
+      
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        # Container registry username
+        username: # default is 
+        # Container registry password
+        password: # default is 
+        # Container registry server url
+        login-server: # default is https://index.docker.io/v1/
